@@ -15,6 +15,10 @@ import java.util.Date;
 
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
+/**
+ * This class deals with using the camera
+ * @author James Hanratty
+ */
 public class Camera {
 
     static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1;
@@ -24,24 +28,26 @@ public class Camera {
 
     /**
      * Takes a picture and creates the save location for the media file
-     * @param cameraIntent: The camera intent
-     * @param compass_value: The compass value
+     * @param cameraIntent  The camera intent
+     * @param compass_value The compass value
      */
-    public static void  takePicture(Intent cameraIntent, int compass_value){
+    public static Uri  takePicture(Intent cameraIntent, int compass_value){
         Log.d("Camera","inside takPicture()");
         File mediaStorageDirectory = createMediaStorageDirectory();
         File mediaFile = createMediaFile(MEDIA_TYPE_IMAGE, mediaStorageDirectory, compass_value);
         Uri fileUri = Uri.fromFile(mediaFile);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
         Log.d("Camera",String.format("Saved Picture to: %s", mediaFile.getAbsolutePath()));
+        return fileUri;
     }
 
     /**
      * Create the mediaFile
-     * @param type: The type of file
-     * @param mediaStorageDirectory: directoy where the image should be stored
-     * @param compass_value: the current compass value
-     * @return: The media file
+     * @param type                      The type of file
+     * @param mediaStorageDirectory     Directoy where the image should be stored
+     * @param compass_value             The current compass value
+     * @return                          The media file
+     * @see File
      */
     private static File createMediaFile(int type, File mediaStorageDirectory, int compass_value){
         File mediaFile = null;
@@ -58,7 +64,8 @@ public class Camera {
      * if an SD card is enabled then it is stored in
      * the SD_DIRECTORY else it is stored in the public directory
      * PUBLIC_DIRECTORY
-     * @return
+     * @return  Media storgae directory as a File
+     * @see File
      */
     private static File createMediaStorageDirectory(){
         final File mediaStorageDirectory;
@@ -78,6 +85,4 @@ public class Camera {
         }
         return mediaStorageDirectory;
     }
-
-
 }

@@ -8,11 +8,11 @@
         android:icon="@drawable/ic_baseline_camera"
         app:showAsAction="always"/>
 
-<!--    <item-->
-<!--        android:title="Power"-->
-<!--        android:id="@+id/power"-->
-<!--        android:icon="@drawable/ic_baseline_battery"-->
-<!--        app:showAsAction="always"/>-->
+    <item
+        android:title="Power"
+        android:id="@+id/power"
+        android:icon="@drawable/ic_baseline_battery"
+        app:showAsAction="always"/>
 
 <!--    <item-->
 <!--        android:title="Charge"-->
@@ -29,11 +29,11 @@
 <!--        android:title="Health"-->
 <!--        android:id="@+id/battery_health"/>-->
 
-<!--    <item-->
-<!--        android:title="Compass"-->
-<!--        android:id="@+id/compass"-->
-<!--        android:icon="@drawable/ic_baseline_compass"-->
-<!--        app:showAsAction="always"/>-->
+    <item
+        android:title="Compass"
+        android:id="@+id/compass"
+        android:icon="@drawable/ic_baseline_compass"
+        app:showAsAction="always"/>
 
 
 </menu>

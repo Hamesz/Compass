@@ -24,7 +24,7 @@
         android:layout_height="0dp"
         android:background="@android:color/transparent"
         android:contentDescription="TODO"
-        app:layout_constraintBottom_toTopOf="@+id/battery_toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -40,81 +40,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:theme="@style/ToolBarStyle" />
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/battery_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
 
-        <TableLayout
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:stretchColumns="*">
-            <TableRow
-                android:layout_width="0dip"
-                android:layout_height="fill_parent">
-
-                <ImageView
-                    android:id="@+id/chargeIV"
-                    android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_column="0"
-                    app:srcCompat="@drawable/ic_battery_charge" />
-
-                <ImageView
-                    android:id="@+id/voltageIV"
-                    android:layout_width="0dip"
-                    android:layout_height="fill_parent"
-                    android:layout_column="1"
-                    app:srcCompat="@drawable/ic_battery_voltage" />
-
-                <ImageView
-                    android:id="@+id/tempIV"
-                    android:layout_width="0dip"
-                    android:layout_height="fill_parent"
-                    android:layout_column="2"
-                    app:srcCompat="@drawable/ic_battery_temp" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="0dip"
-                android:layout_height="fill_parent">
-
-                <TextView
-                    android:id="@+id/chargeTV"
-                    android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_column="0"
-                    android:layout_gravity="center"
-                    android:text="87%"
-                    android:textColor="@color/black" />
-
-                <TextView
-                    android:id="@+id/voltageTV"
-                    android:layout_width="0dip"
-                    android:layout_height="fill_parent"
-                    android:layout_column="1"
-                    android:layout_gravity="center"
-                    android:text="3.3V"
-                    android:textColor="@color/black" />
-
-                <TextView
-                    android:id="@+id/tempTV"
-                    android:layout_width="0dip"
-                    android:layout_height="fill_parent"
-                    android:layout_column="2"
-                    android:layout_gravity="center"
-                    android:text="37º"
-                    android:textColor="@color/black" />
-            </TableRow>
-        </TableLayout>
-
-    </androidx.appcompat.widget.Toolbar>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

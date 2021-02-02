@@ -6,14 +6,20 @@ import android.widget.TextView;
 
 import static java.lang.Math.abs;
 
+/**
+ * This class deals with the animation of the compass
+ * @author James Hanratty
+ */
 public class Animation {
     // UI
     ImageView CompassIV;
     TextView DirectionTV;
 
-    // variables for animation
+    // current orientation degree between [-180,180]
     float currentDegree = 0.0f;
+    // the last time the animation was performed
     long lastUpdatedTime = 0;
+    // Animation Constants
     final static int animationInterval = 1000;   // time in ms before animation moves again
     final static int animationDuration = 250;    // 250ms
 
@@ -23,8 +29,9 @@ public class Animation {
     }
 
     /**
-     * animates the compass
-     * @param degree: degree of orientation between [-180,180]
+     * Animates the compass
+     * @param degree Degree of orientation between [-180,180]
+     * @see Animation
      */
     public void animateCompass(float degree){
         // create and start animation

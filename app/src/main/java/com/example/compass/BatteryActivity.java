@@ -6,8 +6,12 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,101 +20,66 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import static com.example.compass.Camera.CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE;
 
 /**
- * This activity presents the compass
+ * This activity presents the battery information
  * @author James Hanratty
  */
-public class CompassActivity extends AppCompatActivity implements Orientation.Listener{
+public class BatteryActivity extends AppCompatActivity implements Orientation.Listener{
 
-    private Orientation mOrientation;
-    private com.example.compass.Animation compassAnimation;
-
-    // compass value in 360 degrees
+    private Battery battery;
+    Orientation mOrientation;
+    private static final int PERMISSION_REQUEST_CAMERA_CODE = 100;
     private int compassValue;
 
-    // request code when asking permissions for the camera
-    private static final int PERMISSION_REQUEST_CAMERA_CODE = 100;
-
-    /**
-     * initialises everything this activity needs to do:
-     * such as the camera, compass, animation and toolbar
-     * @param savedInstanceState    The saved state instance
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // create the orientation java object
+        setContentView(R.layout.activity_battery_sctivity);
         mOrientation = new Orientation(this);
-        initialiseAnimation();
-        initialiseCamera();
         initialiseToolbar();
+        initialiseCamera();
+        initialiseBattery();
     }
 
 
-    // -- Toolbar Methods --
+    // -- Battery Methods --
+
     /**
-     * Initialises the toolbar by inflating it and displaying it
+     * Intialises the battery by registering as a listener for
+     * any changes to the battery
      */
-    private void initialiseToolbar(){
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
-//        Drawable d = myToolbar.getContext().getResources().getDrawable(R.drawable.ic_baseline_battery);
-//        myToolbar.setOverflowIcon(d);
+    private void initialiseBattery() {
+        IntentFilter ifilter = new IntentFilter((Intent.ACTION_BATTERY_CHANGED));
+        registerReceiver(batteryReciever, ifilter);
+
+        TextView batteryTV = findViewById(R.id.batteryTV);;
+        battery = new Battery(batteryTV);
     }
 
     /**
-     * Inflates the toolbar showing all of the icons
-     * @param menu  The xml name for the toolbar
-     * @return      true
+     * cretaes the battery reciever which will call the Battery.SetBatteryValues when
+     * there is new information about the battery
+     * @see Battery
      */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu,menu);
-        return true;
-    }
-
-    /**
-     * is called when the toolbar icons are clicked
-     * @param item   What toolbar icon
-     * @return      true
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        int id = item.getItemId();
-        String text = "";
-        switch(id){
-            case  R.id.camera:
-                cameraClicked();
-                break;
-            case R.id.power:
-                powerClicked();
-                break;
-            case R.id.compass:
-                compassClicked();
-                break;
+    private BroadcastReceiver batteryReciever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
+                Log.i("Battery","notification");
+                battery.SetBatteryValues(intent);
+            }
         }
-        return true;
-    }
-
-    /**
-     * Does goes to the BatteryActivity
-     */
-    private void powerClicked(){
-        Intent i = new Intent(getApplicationContext(),BatteryActivity.class);
-        startActivity(i);
-    }
+    };
     // --------------------
 
 
     // -- Camera Methods --
-
     /**
      * Initialises the camera by setting the VM builder to
      * allow android studio to use the camera
@@ -118,29 +87,6 @@ public class CompassActivity extends AppCompatActivity implements Orientation.Li
     private void initialiseCamera() {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-    }
-
-    /**
-     * checks the camera permissions and asks if they are not granted
-     * @return
-     */
-    private boolean checkCameraPermissions(){
-        boolean fullAccess = false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            fullAccess = true;
-            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-            checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CAMERA_CODE);
-                fullAccess = false;
-            }
-            Log.d("Camera",String.format("Permissions:\ncamera: %b, write: %b, read: %b, full access:%b",(checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED),
-                    (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED),
-                    (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED),
-                    fullAccess));
-        }
-        Log.d("Camera",String.format("Permission Granted: %b",fullAccess));
-        return fullAccess;
     }
 
     /**
@@ -159,6 +105,29 @@ public class CompassActivity extends AppCompatActivity implements Orientation.Li
                 Toast.makeText(getApplicationContext(),"Camera failed",Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    /**
+     * checks the camera permissions and asks if they are not granted
+     * @return
+     */
+    private boolean checkCameraPermissions(){
+        boolean fullAccess = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            fullAccess = true;
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                    checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CAMERA_CODE);
+                fullAccess = false;
+            }
+            Log.d("Camera",String.format("Permissions:\ncamera: %b, write: %b, read: %b, full access:%b",(checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED),
+                    (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED),
+                    (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED),
+                    fullAccess));
+        }
+        Log.d("Camera",String.format("Permission Granted: %b",fullAccess));
+        return fullAccess;
     }
 
     /**
@@ -210,11 +179,66 @@ public class CompassActivity extends AppCompatActivity implements Orientation.Li
     // ------------------
 
 
+    // -- Toolbar methods --
+    /**
+     * Initialises the toolbar by inflating it and displaying it
+     */
+    private void initialiseToolbar(){
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+//        Drawable d = myToolbar.getContext().getResources().getDrawable(R.drawable.ic_baseline_battery);
+//        myToolbar.setOverflowIcon(d);
+    }
+
+    /**
+     * Inflates the toolbar showing all of the icons
+     * @param menu  The xml name for the toolbar
+     * @return      true
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu,menu);
+        return true;
+    }
+
+    /**
+     * is called when the toolbar icons are clicked
+     * @param item: What toolbar icon
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int id = item.getItemId();
+        String text = "";
+        switch(id){
+            case  R.id.camera:
+                cameraClicked();
+                break;
+            case R.id.power:
+                powerClicked();
+                break;
+            case R.id.compass:
+                compassClicked();
+                break;
+        }
+        return true;
+    }
+
+    /**
+     * Method does nothing as we are already in battery activity
+     */
+    private void powerClicked(){
+    }
+    // ------------------
+
+
     // -- Compass Methods --
     /**
-     * Does nothiing as we are already in this activity
+     * Method moves to the compass activity
      */
     private void compassClicked(){
+        Intent i = new Intent(getApplicationContext(),CompassActivity.class);
+        startActivity(i);
     }
 
     /**
@@ -224,25 +248,12 @@ public class CompassActivity extends AppCompatActivity implements Orientation.Li
      */
     @Override
     public void onOrientationChanged(float degree) {
-        compassAnimation.animateCompass(degree);
         compassValue = Orientation.convertTo360Degrees(degree);
     }
-    // --------------------
+    // ---------------------
 
 
-    // -- Animation Methods --
-    /**
-     * Initialises the animation
-     */
-    private void initialiseAnimation() {
-        TextView direction_TV = findViewById(R.id.directiontextView);
-        ImageView compass_IV = findViewById(R.id.compassimageview);
-        compassAnimation = new com.example.compass.Animation(compass_IV, direction_TV);
-    }
-    // ----------------------
-
-
-    // -- Activity Methods --
+    // -- Default Activity Methods --
     /**
      * un registers the orientation listener
      */
@@ -260,6 +271,5 @@ public class CompassActivity extends AppCompatActivity implements Orientation.Li
         super.onResume();
         mOrientation.startListening(this);
     }
-    // --------------------
-
+    // -----------------------------
 }
