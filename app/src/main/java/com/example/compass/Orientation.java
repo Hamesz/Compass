@@ -45,6 +45,7 @@ public class Orientation implements SensorEventListener {
         mSensorManager = (SensorManager) activity.getSystemService(Activity.SENSOR_SERVICE);
         // Can be null if the sensor hardware is not available
         mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        this.activity = activity;
     }
 
     /**
