@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="Camera"
+        android:id="@+id/camera"
+        android:icon="@drawable/ic_baseline_camera"
+        app:showAsAction="always"/>
+
+    <item
+        android:title="Power"
+        android:id="@+id/power"
+        android:icon="@drawable/ic_baseline_battery"
+        app:showAsAction="always"/>
+
+<!--    <item-->
+<!--        android:title="Charge"-->
+<!--        android:textColor="@color/black"-->
+<!--        android:id="@+id/battery_charge"/>-->
+<!--    <item-->
+<!--        android:title="Voltage"-->
+<!--        android:textColor="@color/black"-->
+<!--        android:id="@+id/battery_voltage"/>-->
+<!--    <item-->
+<!--        android:title="Temperature"-->
+<!--        android:id="@+id/battery_temp"/>-->
+<!--    <item-->
+<!--        android:title="Health"-->
+<!--        android:id="@+id/battery_health"/>-->
+
+    <item
+        android:title="Compass"
+        android:id="@+id/compass"
+        android:icon="@drawable/ic_baseline_compass"
+        app:showAsAction="always"/>
+
+
+</menu>
