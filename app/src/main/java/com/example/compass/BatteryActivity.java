@@ -33,7 +33,6 @@ public class BatteryActivity extends AppCompatActivity implements Orientation.Li
 
     private Battery battery;
     Orientation mOrientation;
-    private static final int PERMISSION_REQUEST_CAMERA_CODE = 100;
     private int compassValue;
 
     @Override
@@ -98,6 +97,9 @@ public class BatteryActivity extends AppCompatActivity implements Orientation.Li
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             Log.d("Camera", "Taking picture...");
             Uri fileUri = Camera.takePicture(cameraIntent, compassValue);
+            Intent scanFileIntent = new Intent(
+                    Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, fileUri);
+            sendBroadcast(scanFileIntent);
             try {
                 startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
             } catch (ActivityNotFoundException e) {
@@ -114,17 +116,7 @@ public class BatteryActivity extends AppCompatActivity implements Orientation.Li
     private boolean checkCameraPermissions(){
         boolean fullAccess = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            fullAccess = true;
-            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                    checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CAMERA_CODE);
-                fullAccess = false;
-            }
-            Log.d("Camera",String.format("Permissions:\ncamera: %b, write: %b, read: %b, full access:%b",(checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED),
-                    (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED),
-                    (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED),
-                    fullAccess));
+            fullAccess = Camera.checkPermissions(this, this);
         }
         Log.d("Camera",String.format("Permission Granted: %b",fullAccess));
         return fullAccess;
@@ -140,12 +132,12 @@ public class BatteryActivity extends AppCompatActivity implements Orientation.Li
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_REQUEST_CAMERA_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED
-                    && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+        boolean[] granted = Camera.onRequestPermissionsResult(requestCode, grantResults);
+        if (granted[1]) {
+            if (granted[0]) {
                 cameraClicked();
             } else {
-                Toast.makeText(getApplicationContext(), "Camera permission denied, please accept to use the camera", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Camera permissions not granted, can't take a picture", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -160,19 +152,8 @@ public class BatteryActivity extends AppCompatActivity implements Orientation.Li
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            String text;
-            switch (resultCode) {
-                case RESULT_OK:
-                    text = "Image saved!";
-                    break;
-                case RESULT_CANCELED:
-                    text = "cancelled";
-                    break;
-                default:
-                    text = "failed";
-                    break;
-            }
+        String text = Camera.onActivityResult(requestCode, resultCode);
+        if (text != null){
             Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
         }
     }

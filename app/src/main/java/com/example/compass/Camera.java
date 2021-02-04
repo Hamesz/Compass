@@ -1,18 +1,27 @@
 package com.example.compass;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
@@ -21,17 +30,17 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
  */
 public class Camera {
 
-    static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1;
-    private static final int MY_CAMERA_REQUEST_CODE = 100;
-    static final String STORAGE_DIRECTORY= "/storage/sdcard0/EMFdetectingApp/";
-    static final String PUBLIC_DIRECTORY= "/EMFdetectingApp/";
+    public static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1;
+    public static final int PERMISSION_REQUEST_CAMERA_CODE = 100;
+    public static final String STORAGE_DIRECTORY= "/storage/sdcard0/EMFdetectingApp/";
+    public static final String PUBLIC_DIRECTORY= "/EMFdetectingApp/";
 
     /**
      * Takes a picture and creates the save location for the media file
      * @param cameraIntent  The camera intent
      * @param compass_value The compass value
      */
-    public static Uri  takePicture(Intent cameraIntent, int compass_value){
+    public static Uri takePicture(Intent cameraIntent, int compass_value){
         Log.d("Camera","inside takPicture()");
         File mediaStorageDirectory = createMediaStorageDirectory();
         File mediaFile = createMediaFile(MEDIA_TYPE_IMAGE, mediaStorageDirectory, compass_value);
@@ -84,5 +93,73 @@ public class Camera {
             }
         }
         return mediaStorageDirectory;
+    }
+
+    /**
+     * This method will alert the user on the success of the picture
+     * being taken and return the approproate text
+     * @param requestCode   Array of request codes
+     * @param resultCode    Array of results
+     * @return text describing the success
+     */
+    public static String onActivityResult(int requestCode, int resultCode){
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+            String text;
+            switch (resultCode) {
+                case RESULT_OK:
+                    text = "Image saved in directory:\n" + PUBLIC_DIRECTORY;
+                    break;
+                case RESULT_CANCELED:
+                    text = "Cancelled";
+                    break;
+                default:
+                    text = "Failed";
+                    break;
+            }
+            return text;
+        }
+        return null;
+    }
+
+    /**
+     * checks the camera permissions and asks if they are not granted
+     * Requires API 25 or above so that permission granting can happen automatically.
+     * @param context   The context of the activity that called this method
+     * @param activity  The Activity
+     * @return          true if all permissions are granted
+     */
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public static boolean checkPermissions(Context context, Activity activity){
+        boolean fullAccess = true;
+        if (context.checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            activity.requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CAMERA_CODE);
+            fullAccess = false;
+        }
+        return fullAccess;
+    }
+
+    /**
+     * This method determines if the appropriate permissions were granted to use the camera
+     * and will return all true if they were
+     * @param requestCode   the request code
+     * @param grantResults  the permissions granted or not granted
+     * @result permissionsGranted a boolean array where
+     * 1st is if permissions were granted and 2nd index is if request code was correct
+     */
+    public static boolean[] onRequestPermissionsResult(int requestCode, @NonNull int[] grantResults){
+        // first is if permissions were granted, 2nd is if requestcode was correct
+        boolean[] permissionsGranted = {false, false};
+        if (requestCode == PERMISSION_REQUEST_CAMERA_CODE) {
+            permissionsGranted[1] = true;
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                permissionsGranted[0] = true;
+            } else {
+                permissionsGranted[0] = false;
+            }
+        }
+        return permissionsGranted;
     }
 }

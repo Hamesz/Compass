@@ -7,6 +7,11 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+import static com.example.compass.Camera.CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE;
 
 /**
  * This class deals with the battery information
@@ -38,7 +43,7 @@ public class Battery {
                 "Battery Status: %s\n" +
                 "Battery Plugged: %s\n" +
                 "Battery Health: %s\n" +
-                "Battery Voltage: %.1f\n" +
+                "Battery Voltage: %.1fv\n" +
                 "Battery Temperature: %.0fºC\n" +
                 "Battery Technology: %s\n",status, plugged, health, BatteryV, BatteryT, BatteryTe));
 
@@ -103,5 +108,6 @@ public class Battery {
                 return "Unkown";
         }
     }
+
 
 }
