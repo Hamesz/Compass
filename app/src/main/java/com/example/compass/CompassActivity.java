@@ -127,9 +127,7 @@ public class CompassActivity extends AppCompatActivity implements Orientation.Li
     private boolean checkCameraPermissions(){
         boolean fullAccess = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                fullAccess = Camera.checkPermissions(this, this);
-            }
+            fullAccess = Camera.checkPermissions(this, this);
         }
         Log.d("Camera",String.format("Permission Granted: %b",fullAccess));
         return fullAccess;
